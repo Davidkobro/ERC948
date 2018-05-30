@@ -8,18 +8,18 @@ contract ERC948 {
         Second
     }
 
-		struct Subscription {
-        address owner;
-        address payeeAddress;
-        address tokenAddress;
-        uint amountRecurring;
-        uint amountInitial;
-        uint periodType;
-        uint periodMultiplier;
-        uint startTime;
-        string data;
-        bool active;
-        uint nextPaymentTime;
+	struct Subscription {
+		address owner;
+		address payeeAddress;
+		address tokenAddress;
+		uint amountRecurring;
+		uint amountInitial;
+		uint periodType;
+		uint periodMultiplier;
+		uint startTime;
+		string data;
+		bool active;
+		uint nextPaymentTime;
 
         // uint terminationDate;
     }
@@ -34,8 +34,7 @@ contract ERC948 {
         uint _amountInitial,
         uint _periodType,
         uint _periodMultiplier,
-        uint _startTime
-        );
+        uint _startTime);
 
     /**
     * @dev Called by the subscriber on their own wallet, using data initiated by the merchant in a checkout flow.
@@ -48,6 +47,7 @@ contract ERC948 {
     * @param _startTime Date that the subscription becomes active
     * @return A bytes32 for the created subscriptionId
     */
+    
     function createSubscription(
         address _payeeAddress,
         address _tokenAddress,
@@ -58,9 +58,8 @@ contract ERC948 {
         uint _startTime,
         string _data
         )
-        public
-        returns (bytes32)
-    {
+        public returns (bytes32) {
+	
         // Ensure that _periodType is valid
         // TODO support hour, day, week, month, year
         require((_periodType == 0),
@@ -102,7 +101,8 @@ contract ERC948 {
         // Save subscription
         bytes32 subscriptionId = keccak256(msg.sender, block.timestamp);
         subscriptions[subscriptionId] = newSubscription;
-        // TODO check for existing subscriptionId
+       
+       // TODO check for existing subscriptionId
 
         // Make initial payment
         token.transferFrom(msg.sender, _payeeAddress, _amountInitial);
@@ -116,18 +116,14 @@ contract ERC948 {
             _amountInitial,
             _periodType,
             _periodMultiplier,
-            _startTime
-            );
+            _startTime);
 
         return subscriptionId;
     }
 
 
     // TODO fix bug where this returns true for an unset subscriptionId
-    function paymentDue(bytes32 _subscriptionId)
-        public
-        view
-        returns (bool)
+    function paymentDue(bytes32 _subscriptionId) public view returns (bool)
     {
         Subscription memory subscription = subscriptions[_subscriptionId];
 
@@ -153,18 +149,15 @@ contract ERC948 {
     * @param _amount Amount to be transferred, can be lower than total allowable amount
     * @return A boolean to indicate whether the payment was successful
     */
-    function processSubscription(
-        bytes32 _subscriptionId,
-        uint _amount
-        )
-        public
-        returns (bool)
-    {
+    function processSubscription(bytes32 _subscriptionId, uint _amount) public returns (bool){
+    
         Subscription storage subscription = subscriptions[_subscriptionId];
-
+	
+	//Checks whether amount requested is less than or equal to the amount authorized
         require((_amount <= subscription.amountRecurring),
             'Requested amount is higher than authorized');
 
+	//Checks whether a payment is due or not
         require((paymentDue(_subscriptionId)),
             'A Payment is not due for this subscription');
 
